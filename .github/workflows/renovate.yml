@@ -9,15 +9,27 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  id-token: write  # 新增：允許 GitHub 向 GCP 驗證身分
 
 jobs:
   renovate:
     runs-on: ubuntu-latest
 
     steps:
+      # ① 原本就有：下載 Repository
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ② 新增：登入 GCP
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+
+      # ③ 原本就有：執行 Renovate
       - name: Run Renovate
         uses: renovatebot/github-action@v46.3.10
         with:
@@ -25,3 +37,14 @@ jobs:
           configurationFile: renovate-config.js
         env:
           LOG_LEVEL: info
+
+          # 新增：讓 Renovate 可以讀取 GCP Image
+          RENOVATE_HOST_RULES: >-
+            [
+              {
+                "hostType": "docker",
+                "matchHost": "asia.gcr.io",
+                "username": "oauth2accesstoken",
+                "password": "${{ steps.auth.outputs.access_token }}"
+              }
+            ]

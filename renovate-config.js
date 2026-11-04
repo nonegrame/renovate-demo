@@ -1,9 +1,7 @@
 module.exports = {
   platform: "github",
 
-  repositories: [
-    "nonegrame/renovate-demo"
-  ],
+  repositories: ["nonegrame/renovate-demo"],
 
   onboarding: false,
   requireConfig: "ignored",
@@ -14,10 +12,19 @@ module.exports = {
 
   packageRules: [
     {
+      // 只允許指定的 Image
       matchDatasources: ["docker"],
-      matchPackageNames: ["python"],
-
-      // 禁止升級版本或更換 Tag
+      matchPackageNames: [
+        "!asia.gcr.io/verycoolproject-dcf97/python"
+      ],
+      enabled: false
+    },
+    {
+      // 禁止版本 Tag 升級，但保留 Digest 更新
+      matchDatasources: ["docker"],
+      matchPackageNames: [
+        "asia.gcr.io/verycoolproject-dcf97/python"
+      ],
       matchUpdateTypes: [
         "major",
         "minor",
