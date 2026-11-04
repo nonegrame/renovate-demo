@@ -9,17 +9,22 @@ module.exports = {
   requireConfig: "ignored",
 
   enabledManagers: ["dockerfile"],
-
   pinDigests: true,
-
   automerge: false,
 
   packageRules: [
     {
       matchDatasources: ["docker"],
       matchPackageNames: ["python"],
-      matchCurrentValue: "/^3\\.14-slim-trixie$/",
-      pinDigests: true
+
+      // 禁止升級版本或更換 Tag
+      matchUpdateTypes: [
+        "major",
+        "minor",
+        "patch",
+        "replacement"
+      ],
+      enabled: false
     }
   ]
 };
